@@ -129,9 +129,32 @@ def venues():
       "num_upcoming_shows": 0,
     }]
   }]
+
+  returnedData = []
+  citiesD = {}
+  venuesDict = {}
+  venues = Venue.query.all()
+  cities = []
+
+  for venue in venues:
+    if venue.city not in cities:
+      citiesD['city'] = venue.city
+      citiesD['state'] = venue.state
+      citiesD['venues'] = []
+      venuesDict['id'] = venue.id 
+      venuesDict['name'] = venue.name
+      citiesD['venues'].append(venuesDict.copy())
+      returnedData.append(citiesD.copy())
+      cities.append(venue.city) 
+    else:
+      for x in returnedData:
+        if x['city'] == venue.city:
+          venuesDict['id'] = venue.id 
+          venuesDict['name'] = venue.name
+          x['venues'].append(venuesDict.copy())
+
   areas = []
-  return render_template('pages/venues.html', areas=data);
-  # return render_template('pages/venues.html', areas=Venue.query.all())
+  return render_template('pages/venues.html', areas=returnedData);
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
