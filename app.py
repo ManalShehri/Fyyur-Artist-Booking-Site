@@ -13,6 +13,7 @@ from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
+import datetime
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -28,7 +29,16 @@ migrate = Migrate(app, db)
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
+class Show(db.Model):
+    __tablename__ = 'Show'
 
+    id = db.Column(db.Integer, primary_key=True)
+    venue_id = db.Column('venue_id',db.Integer, db.ForeignKey('Venue.id'))
+    artist_id = db.Column('artist_id',db.Integer, db.ForeignKey('Artist.id'))
+    created_at = db.Column(db.DateTime, default = datetime.datetime.now)
+    venue = db.relationship("Venue", back_populates="artist")
+    artist = db.relationship("Artist", back_populates="venue")  
+    
 class Venue(db.Model):
     __tablename__ = 'Venue'
 
@@ -44,8 +54,7 @@ class Venue(db.Model):
     seeking_talent = db.Column(db.Boolean, nullable=False)
     seeking_description = db.Column(db.String(500))
 
-    def __repr__(self):
-          return f'<Venue {self.id} {self.name} {self.city} {self.state} {self.address} {self.phone} {self.image_link} {self.facebook_link} {self.website} {self.seeking_talent} {self.seeking_description}>'
+    artist = db.relationship("Show", back_populates="venue", cascade="all, delete-orphan")
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
 class Artist(db.Model):
@@ -59,6 +68,11 @@ class Artist(db.Model):
     genres = db.Column(db.String(120))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
+    website = db.Column(db.String(120))
+    seeking_venue = db.Column(db.Boolean, nullable=False)
+    seeking_description = db.Column(db.String(500))
+  
+    venue = db.relationship("Show", back_populates="artist", cascade="all, delete-orphan")
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
 
@@ -116,8 +130,8 @@ def venues():
     }]
   }]
   areas = []
-  # return render_template('pages/venues.html', areas=data);
-  return render_template('pages/venues.html', areas=Venue.query.all())
+  return render_template('pages/venues.html', areas=data);
+  # return render_template('pages/venues.html', areas=Venue.query.all())
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
@@ -215,6 +229,9 @@ def show_venue(venue_id):
     "past_shows_count": 1,
     "upcoming_shows_count": 1,
   }
+  # v2 = Venue(name = "The Dueling Pianos Bar", city = "New York",state = "NY",address = "335 Delancey Street",phone = "914-003-1132",image_link = "https://images.unsplash.com/photo-1497032205916-ac775f0649ae?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",facebook_link = "https://www.facebook.com/theduelingpianos",website = "https://www.theduelingpianos.com",seeking_talent = False)
+  # v3 = Venue(name = "Park Square Live Music & Coffee", city = "San Francisco",state = "CA",address = "34 Whiskey Moore Ave",phone = "415-000-1234",image_link = "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",facebook_link = "https://www.facebook.com/ParkSquareLiveMusicAndCoffee",website = "https://www.parksquarelivemusicandcoffee.com",seeking_talent = False)
+
   data = list(filter(lambda d: d['id'] == venue_id, [data1, data2, data3]))[0]
   return render_template('pages/show_venue.html', venue=data)
 
@@ -354,6 +371,9 @@ def show_artist(artist_id):
     "past_shows_count": 0,
     "upcoming_shows_count": 3,
   }
+  # a2 = Artist(name="Matt Quevedo",city="New York",state="NY",phone="300-400-5000",genres="Jazz" ,image_link = "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80", facebook_link = "https://www.facebook.com/mattquevedo923251523", seeking_venue =False )
+  # a3 = Artist( name = "The Wild Sax Band", city = "San Francisco", state =  "CA", phone = "432-325-5432", genres = "Jazz", image_link = "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80", facebook_link = "https://www.facebook.com/mattquevedo923251523", seeking_venue =False )
+
   data = list(filter(lambda d: d['id'] == artist_id, [data1, data2, data3]))[0]
   return render_template('pages/show_artist.html', artist=data)
 
