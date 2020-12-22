@@ -53,6 +53,7 @@ class Venue(db.Model):
     website = db.Column(db.String(120))
     seeking_talent = db.Column(db.Boolean, nullable=False)
     seeking_description = db.Column(db.String(500))
+    genres = db.Column(db.ARRAY(db.String))
 
     artist = db.relationship("Show", back_populates="venue", cascade="all, delete-orphan")
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
@@ -257,6 +258,7 @@ def show_venue(venue_id):
   data ={
     "id": venue_id,
     "name": venue.name,
+    "genres": venue.genres,
     "address": venue.address,
     "city": venue.city,
     "state": venue.state,
@@ -282,12 +284,28 @@ def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
 
+  data = []
+  name = request.form.get('name')
+  city = request.form.get('city') 
+  state = request.form.get('state')
+  address = request.form.get('address')
+  phone = request.form.get('phone')
+  genres = request.form.getlist('genres')
+  facebook_link = request.form.get('facebook_link')
+  website = request.form.get('website')
+  seeking_talent = request.form.get('seeking_talent')
+  seeking_description = request.form.get('seeking_description')
+
+  # check if the form returns values
+  data = [name,state,city,address,phone,genres,facebook_link,website,seeking_talent,seeking_description]
+  
   # on successful db insert, flash success
   flash('Venue ' + request.form['name'] + ' was successfully listed!')
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-  return render_template('pages/home.html')
+  # return render_template('pages/home.html')
+  return render_template('pages/test.html', theD = data)
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
@@ -602,3 +620,11 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
 '''
+
+# add elements to python shell to check genres works fine
+
+# v2 = Venue(name = "The Dueling Pianos Bar", city = "New York",state = "NY",address = "335 Delancey Street",phone = "914-003-1132",image_link = "https://images.unsplash.com/photo-1497032205916-ac775f0649ae?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=750&q=80",facebook_link = "https://www.facebook.com/theduelingpianos",website = "https://www.theduelingpianos.com",seeking_talent = False, genres = ["Classical", "R&B", "Hip-Hop"])
+# v3 = Venue(name = "Park Square Live Music & Coffee", city = "San Francisco",state = "CA",address = "34 Whiskey Moore Ave",phone = "415-000-1234",image_link = "https://images.unsplash.com/photo-1485686531765-ba63b07845a7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=747&q=80",facebook_link = "https://www.facebook.com/ParkSquareLiveMusicAndCoffee",website = "https://www.parksquarelivemusicandcoffee.com",seeking_talent = False)
+
+# a2 = Artist(name="Matt Quevedo",city="New York",state="NY",phone="300-400-5000",genres="Jazz" ,image_link = "https://images.unsplash.com/photo-1495223153807-b916f75de8c5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80", facebook_link = "https://www.facebook.com/mattquevedo923251523", seeking_venue =False )
+# a3 = Artist( name = "The Wild Sax Band", city = "San Francisco", state =  "CA", phone = "432-325-5432", genres = "Jazz", image_link = "https://images.unsplash.com/photo-1558369981-f9ca78462e61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=794&q=80", facebook_link = "https://www.facebook.com/mattquevedo923251523", seeking_venue =False )
