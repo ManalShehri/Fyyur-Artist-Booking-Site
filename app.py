@@ -560,14 +560,24 @@ def edit_artist(artist_id):
   #   "seeking_description": "Looking for shows to perform at in the San Francisco Bay Area!",
   #   "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
   # }
-  # TODO: populate form with fields from artist with ID <artist_id>
+  # TODO: populate form with fields from artist with ID <artist_id> (Done)
   artist = Artist.query.filter_by(id=artist_id).first()
+  form.name.data = artist.name
+  form.city.data = artist.city
+  form.state.data = artist.state
+  form.phone.data = artist.phone
+  form.genres.data = artist.genres
+  form.facebook_link.data = artist.facebook_link
+  form.website.data = artist.website
+  form.image_link.data = artist.image_link
+  form.seeking_venue.data = artist.seeking_venue
+  form.seeking_description.data = artist.seeking_description
   return render_template('forms/edit_artist.html', form=form, artist=artist)
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
-  # artist record with ID <artist_id> using the new attributes
+  # artist record with ID <artist_id> using the new attributes (Done)
   try:
     artist = Artist.query.filter_by(id=artist_id).first()
     if artist:
@@ -620,7 +630,7 @@ def edit_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
-  # TODO: take values from the form submitted, and update existing
+  # TODO: take values from the form submitted, and update existing (Done)
   # venue record with ID <venue_id> using the new attributes
   try:
     venue = Venue.query.filter_by(id=venue_id).first()
@@ -661,8 +671,8 @@ def create_artist_form():
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
   # called upon submitting the new artist listing form
-  # TODO: insert form data as a new Venue record in the db, instead
-  # TODO: modify data to be the data object returned from db insertion
+  # TODO: insert form data as a new Venue record in the db, instead (Done)
+  # TODO: modify data to be the data object returned from db insertion (Done)
   name = request.form.get('name')
   city = request.form.get('city') 
   state = request.form.get('state')
@@ -679,7 +689,7 @@ def create_artist_submission():
     seeking_venue = False
 
   # on successful db insert, flash success
-  # TODO: on unsuccessful db insert, flash an error instead.
+  # TODO: on unsuccessful db insert, flash an error instead. (Done)
   # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
   try:
     insertedArtist = Artist(name = name, city = city, state = state, phone = phone, image_link = image_link,facebook_link = facebook_link ,website = website, seeking_venue = seeking_venue, genres = genres, seeking_description= seeking_description)
@@ -700,7 +710,7 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
   # displays list of shows at /shows
-  # TODO: replace with real venues data.
+  # TODO: replace with real venues data. (Done)
   #       num_shows should be aggregated based on number of upcoming shows per venue.
   # data=[{
   #   "venue_id": 1,
@@ -763,7 +773,7 @@ def create_shows():
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
-  # TODO: insert form data as a new Show record in the db, instead
+  # TODO: insert form data as a new Show record in the db, instead (Done)
 
   artist_id = request.form.get('artist_id')
   artist = Artist.query.filter_by(id=artist_id).first()
@@ -788,7 +798,7 @@ def create_show_submission():
       db.session.close()
     return render_template('pages/home.html')
 
-  # TODO: on unsuccessful db insert, flash an error instead.
+  # TODO: on unsuccessful db insert, flash an error instead. 
   # e.g., flash('An error occurred. Show could not be listed.')
   # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
   flash('An error occurred. Show could not be listed.')
