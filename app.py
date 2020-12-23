@@ -103,7 +103,7 @@ def index():
 
 
 #  Venues
-#  ----------------------------------------------------------------
+#  -------------------------------------------------------- --------
 
 @app.route('/venues')
 def venues():
@@ -165,7 +165,7 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
-  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
+  # TODO: implement search on artists with partial string search. Ensure it is case-insensitive. (Done)
   # seach for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
   
@@ -188,7 +188,7 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
-  # TODO: replace with real venue data from the venues table, using venue_id
+  # TODO: replace with real venue data from the venues table, using venue_id (Done)
   # data1={
   #   "id": 1,
   #   "name": "The Musical Hop",
@@ -267,7 +267,29 @@ def show_venue(venue_id):
   #   "upcoming_shows_count": 1,
   # }
 
+  now = datetime.datetime.now()
+  nextShowinArray = {} 
+  upcoming_shows = []
+  past_shows = []
+
   venue = Venue.query.filter_by(id=venue_id).first()
+  # retrive related show
+  shows = Show.query.filter_by(venue=venue).all()
+  for show in shows:
+    # retrive old shows
+    if show.created_at < now:
+      nextShowinArray['artist_id'] = show.artist.id
+      nextShowinArray['artist_name'] = show.artist.name
+      nextShowinArray['artist_image_link'] = show.artist.image_link
+      nextShowinArray['start_time'] = str(show.created_at)
+      past_shows.append(nextShowinArray.copy())
+    else:
+      nextShowinArray['artist_id'] = show.artist.id
+      nextShowinArray['artist_name'] = show.artist.name
+      nextShowinArray['artist_image_link'] = show.artist.image_link
+      nextShowinArray['start_time'] = str(show.created_at)
+      upcoming_shows.append(nextShowinArray.copy())
+
   data ={
     "id": venue_id,
     "name": venue.name,
@@ -281,6 +303,11 @@ def show_venue(venue_id):
     "seeking_talent": venue.seeking_talent,
     "seeking_description": venue.seeking_description,
     "image_link": venue.image_link,
+    "past_shows": past_shows,
+    "upcoming_shows": upcoming_shows,
+    "past_shows_count": len(past_shows),
+    "upcoming_shows_count": len(upcoming_shows),
+
   }
   return render_template('pages/show_venue.html', venue=data)
 
