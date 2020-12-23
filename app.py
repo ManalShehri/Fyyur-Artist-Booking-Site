@@ -626,6 +626,17 @@ def edit_venue(venue_id):
   # }
   # TODO: populate form with values from venue with ID <venue_id>
   venue = Venue.query.filter_by(id=venue_id).first()
+  form.name.data = venue.name
+  form.city.data = venue.city
+  form.state.data = venue.state
+  form.phone.data = venue.phone
+  form.address.data = venue.address
+  form.genres.data = venue.genres
+  form.facebook_link.data = venue.facebook_link
+  form.website.data = venue.website
+  form.image_link.data = venue.image_link
+  form.seeking_talent.data = venue.seeking_talent
+  form.seeking_description.data = venue.seeking_description
   return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
