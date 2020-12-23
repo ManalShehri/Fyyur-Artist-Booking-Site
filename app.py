@@ -24,7 +24,7 @@ app.config.from_object('config')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# TODO: connect to a local postgresql database
+# TODO: connect to a local postgresql database (Done)
 
 #----------------------------------------------------------------------------#
 # Models.
@@ -56,7 +56,7 @@ class Venue(db.Model):
     genres = db.Column(db.ARRAY(db.String))
 
     artist = db.relationship("Show", back_populates="venue", cascade="all, delete-orphan")
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: implement any missing fields, as a database migration using Flask-Migrate (Done)
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -75,9 +75,9 @@ class Artist(db.Model):
   
     venue = db.relationship("Show", back_populates="artist", cascade="all, delete-orphan")
 
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate
+    # TODO: implement any missing fields, as a database migration using Flask-Migrate (Done)
 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
+# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration. (Done)
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -108,7 +108,7 @@ def index():
 @app.route('/venues')
 def venues():
   # TODO: replace with real venues data.
-  #       num_shows should be aggregated based on number of upcoming shows per venue.
+  #       num_shows should be aggregated based on number of upcoming shows per venue. (Done)
   data=[{
     "city": "San Francisco",
     "state": "CA",
@@ -137,13 +137,19 @@ def venues():
   venues = Venue.query.all()
   cities = []
 
+  # ger the time/date for now
+  now = datetime.datetime.now()
   for venue in venues:
     if venue.city not in cities:
+      shows = Show.query.filter_by(venue=venue).all()
       citiesD['city'] = venue.city
       citiesD['state'] = venue.state
       citiesD['venues'] = []
       venuesDict['id'] = venue.id 
       venuesDict['name'] = venue.name
+      upcoming_shows = filter(lambda s: s.created_at > now , shows)
+      # get the number by adding it to list then len()
+      venuesDict['num_upcoming_shows'] = len(list(upcoming_shows))
       citiesD['venues'].append(venuesDict.copy())
       returnedData.append(citiesD.copy())
       cities.append(venue.city) 
