@@ -14,6 +14,8 @@ from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
 import datetime
+# here I tried to import the model classes from models.py (ike: from models import Show), but it will cause a circle importing error, so I imported the whole file instead
+import models
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -25,57 +27,6 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 # TODO: connect to a local postgresql database (Done)
-
-#----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-class Show(db.Model):
-    __tablename__ = 'Show'
-
-    id = db.Column(db.Integer, primary_key=True)
-    venue_id = db.Column('venue_id',db.Integer, db.ForeignKey('Venue.id'))
-    artist_id = db.Column('artist_id',db.Integer, db.ForeignKey('Artist.id'))
-    created_at = db.Column(db.DateTime, default = datetime.datetime.now)
-    venue = db.relationship("Venue", back_populates="artist")
-    artist = db.relationship("Artist", back_populates="venue")  
-    
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    seeking_talent = db.Column(db.Boolean, nullable=False)
-    seeking_description = db.Column(db.String(500))
-    genres = db.Column(db.ARRAY(db.String))
-
-    artist = db.relationship("Show", back_populates="venue", cascade="all, delete-orphan")
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate (Done)
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.ARRAY(db.String))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-    website = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean, nullable=False)
-    seeking_description = db.Column(db.String(500))
-  
-    venue = db.relationship("Show", back_populates="artist", cascade="all, delete-orphan")
-
-    # TODO: implement any missing fields, as a database migration using Flask-Migrate (Done)
 
 # TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration. (Done)
 
@@ -134,14 +85,14 @@ def venues():
   returnedData = []
   citiesD = {}
   venuesDict = {}
-  venues = Venue.query.all()
+  venues = models.Venue.query.all()
   cities = []
 
   # ger the time/date for now
   now = datetime.datetime.now()
   for venue in venues:
     if venue.city not in cities:
-      shows = Show.query.filter_by(venue=venue).all()
+      shows = models.Show.query.filter_by(venue=venue).all()
       citiesD['city'] = venue.city
       citiesD['state'] = venue.state
       citiesD['venues'] = []
@@ -170,7 +121,7 @@ def search_venues():
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
   
   search =request.form.get('search_term', '')
-  venues = Venue.query.filter(Venue.name.ilike('%'+search+'%')).all()
+  venues = models.Venue.query.filter(Venue.name.ilike('%'+search+'%')).all()
   # source for how to deal with ilike: https://docs.sqlalchemy.org/en/14/orm/internals.html?highlight=ilike#sqlalchemy.orm.attributes.QueryableAttribute.ilike
 
   response = {}
@@ -272,9 +223,9 @@ def show_venue(venue_id):
   upcoming_shows = []
   past_shows = []
 
-  venue = Venue.query.filter_by(id=venue_id).first()
+  venue = models.Venue.query.filter_by(id=venue_id).first()
   # retrive related show
-  shows = Show.query.filter_by(venue=venue).all()
+  shows = models.Show.query.filter_by(venue=venue).all()
   for show in shows:
     # retrive old shows
     if show.created_at < now:
@@ -364,7 +315,7 @@ def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using (Done)
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
-  venue = Venue.query.filter_by(id=venue_id).first()
+  venue = models.Venue.query.filter_by(id=venue_id).first()
   if venue:
     try:
       db.session.delete(venue)
@@ -395,7 +346,7 @@ def artists():
   #   "name": "The Wild Sax Band",
   # }]
   data = []
-  artists = Artist.query.all()
+  artists = models.Artist.query.all()
   artistsDict = {}
   for artist in artists:
     artistsDict['id'] = artist.id 
@@ -411,7 +362,7 @@ def search_artists():
   # search for "band" should return "The Wild Sax Band". (Done)
   
   search =request.form.get('search_term', '')
-  artists = Artist.query.filter(Artist.name.ilike('%'+search+'%')).all()
+  artists = models.Artist.query.filter(Artist.name.ilike('%'+search+'%')).all()
   # source for how to deal with ilike: https://docs.sqlalchemy.org/en/14/orm/internals.html?highlight=ilike#sqlalchemy.orm.attributes.QueryableAttribute.ilike
 
   response = {}
@@ -505,8 +456,8 @@ def show_artist(artist_id):
   nextShowinArray = {} 
   upcoming_shows = []
   past_shows = []
-  artist = Artist.query.filter_by(id=artist_id).first()
-  shows = Show.query.filter_by(artist=artist).all()
+  artist = models.Artist.query.filter_by(id=artist_id).first()
+  shows = models.Show.query.filter_by(artist=artist).all()
   
   for show in shows:
         # retrive old shows
@@ -561,7 +512,7 @@ def edit_artist(artist_id):
   #   "image_link": "https://images.unsplash.com/photo-1549213783-8284d0336c4f?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=300&q=80"
   # }
   # TODO: populate form with fields from artist with ID <artist_id> (Done)
-  artist = Artist.query.filter_by(id=artist_id).first()
+  artist = models.Artist.query.filter_by(id=artist_id).first()
   form.name.data = artist.name
   form.city.data = artist.city
   form.state.data = artist.state
@@ -579,7 +530,7 @@ def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes (Done)
   try:
-    artist = Artist.query.filter_by(id=artist_id).first()
+    artist = models.Artist.query.filter_by(id=artist_id).first()
     if artist:
       seeking_venue = request.form.get('seeking_venue')
       if seeking_venue == 'y':
@@ -625,7 +576,7 @@ def edit_venue(venue_id):
   #   "image_link": "https://images.unsplash.com/photo-1543900694-133f37abaaa5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=400&q=60"
   # }
   # TODO: populate form with values from venue with ID <venue_id>
-  venue = Venue.query.filter_by(id=venue_id).first()
+  venue = models.Venue.query.filter_by(id=venue_id).first()
   form.name.data = venue.name
   form.city.data = venue.city
   form.state.data = venue.state
@@ -644,7 +595,7 @@ def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing (Done)
   # venue record with ID <venue_id> using the new attributes
   try:
-    venue = Venue.query.filter_by(id=venue_id).first()
+    venue = models.Venue.query.filter_by(id=venue_id).first()
     if venue:
       seeking_talent = request.form.get('seeking_talent')
       if seeking_talent == 'y':
@@ -761,7 +712,7 @@ def shows():
   # }]
 
   data = []
-  AllShows = Show.query.all()
+  AllShows = models.Show.query.all()
   showsDict = {}
   # data = [shows]
   for show in AllShows:
@@ -787,10 +738,10 @@ def create_show_submission():
   # TODO: insert form data as a new Show record in the db, instead (Done)
 
   artist_id = request.form.get('artist_id')
-  artist = Artist.query.filter_by(id=artist_id).first()
+  artist = models.Artist.query.filter_by(id=artist_id).first()
 
   venue_id = request.form.get('venue_id')
-  venue = Venue.query.filter_by(id=venue_id).first()
+  venue = models.Venue.query.filter_by(id=venue_id).first()
 
   start_time = request.form.get('start_time')
 
