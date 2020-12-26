@@ -22,7 +22,7 @@ import models
 
 app = Flask(__name__)
 moment = Moment(app)
-app.config.from_object('config')
+app.config.from_object('config.DatabaseURI')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 

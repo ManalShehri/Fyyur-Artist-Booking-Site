@@ -1,13 +1,19 @@
 import os
-SECRET_KEY = os.urandom(32)
-# Grabs the folder where the script runs.
-basedir = os.path.abspath(os.path.dirname(__file__))
 
-# Enable debug mode.
-DEBUG = True
+class DatabaseURI:
+    SECRET_KEY = os.urandom(32)
 
-# Connect to the database
+    # Grabs the folder where the script runs.
+    basedir = os.path.abspath(os.path.dirname(__file__))
 
+    # Enable debug mode.
+    DEBUG = True
 
-# TODO IMPLEMENT DATABASE URL (Done)
-SQLALCHEMY_DATABASE_URI = 'postgresql://manal:123456m@localhost/fyyur'
+    # declear the DB URI parts
+    DATABASE_NAME = "fyyur"
+    username = 'manal'
+    password = '123456m'
+    url = 'localhost:5432'
+
+    # Connect to the database
+    SQLALCHEMY_DATABASE_URI = "postgres://{}:{}@{}/{}".format(username, password, url, DATABASE_NAME)
