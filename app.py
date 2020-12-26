@@ -170,10 +170,12 @@ def create_venue_submission():
   try:
     # insert to Venue
     insertedVenue = models.Venue(name = name, city = city, state = state, address = address, phone = phone, image_link = image_link,facebook_link = facebook_link ,website = website, seeking_talent = seeking_talent, genres = genres, seeking_description= seeking_description)
+    form.populate_obj(insertedVenue)
     db.session.add(insertedVenue)
     db.session.commit()
     flash('Venue ' + name + ' was successfully listed!')
-  except:
+  except ValueError as e:
+    print(e)
     flash('An error occurred. Venue ' + name + ' could not be listed.')
     db.session.rollback()
   finally:
@@ -314,9 +316,11 @@ def edit_artist_submission(artist_id):
       artist.seeking_venue = form.seeking_venue.data
       artist.seeking_description = form.seeking_description.data
       artist.image_link = form.image_link.data
+      form.populate_obj(artist)
       db.session.add(artist)
       db.session.commit()
-  except:
+  except ValueError as e:
+    print(e)
     flash('An error occurred. Artist ' + form.name.data + ' could not be edited.')
     db.session.rollback()
   finally:
@@ -359,9 +363,11 @@ def edit_venue_submission(venue_id):
       venue.seeking_talent = form.seeking_talent.data 
       venue.seeking_description = form.seeking_description.data 
       venue.image_link = form.image_link.data 
+      form.populate_obj(venue)
       db.session.add(venue)
       db.session.commit()
-  except:
+  except ValueError as e:
+    print(e)
     flash('An error occurred. Venue ' + form.name.data + ' could not be edited.')
     db.session.rollback()
   finally:
@@ -392,10 +398,11 @@ def create_artist_submission():
 
   try:
     insertedArtist = models.Artist(name = name, city = city, state = state, phone = phone, image_link = image_link,facebook_link = facebook_link ,website = website, seeking_venue = seeking_venue, genres = genres, seeking_description= seeking_description)
+    form.populate_obj(insertedArtist)
     db.session.add(insertedArtist)
     db.session.commit()
     flash('Artist ' + name + ' was successfully listed!')
-  except:
+  except ValueError as e:
     flash('An error occurred. Artist ' + name + ' could not be listed.')
     db.session.rollback()
   finally:
@@ -445,10 +452,12 @@ def create_show_submission():
     from models import db
     try:
       new_show = models.Show(artist = artist,venue= venue, created_at = start_time)
+      form.populate_obj(new_show)
       db.session.add(new_show)
       db.session.commit()
       flash('Show was successfully listed!')
-    except:
+    except ValueError as e:
+      print(e)
       flash('An error occurred. Show could not be listed.')
       db.session.rollback()
     finally:
