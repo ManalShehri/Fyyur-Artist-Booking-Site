@@ -224,22 +224,26 @@ def show_venue(venue_id):
   past_shows = []
 
   venue = models.Venue.query.filter_by(id=venue_id).first()
-  # retrive related show
-  shows = models.Show.query.filter_by(venue=venue).all()
-  for show in shows:
-    # retrive old shows
-    if show.created_at < now:
-      nextShowinArray['artist_id'] = show.artist.id
-      nextShowinArray['artist_name'] = show.artist.name
-      nextShowinArray['artist_image_link'] = show.artist.image_link
-      nextShowinArray['start_time'] = str(show.created_at)
-      past_shows.append(nextShowinArray.copy())
-    else:
-      nextShowinArray['artist_id'] = show.artist.id
-      nextShowinArray['artist_name'] = show.artist.name
-      nextShowinArray['artist_image_link'] = show.artist.image_link
-      nextShowinArray['start_time'] = str(show.created_at)
-      upcoming_shows.append(nextShowinArray.copy())
+
+  # retrive the upcomming shows using join with Show model and Venue model
+  upcoming_shows_qurey = db.session.query(models.Show).join(models.Venue, models.Show.venue_id== venue_id).filter(models.Show.created_at> now)
+  # insert each show in a seperated dict and append each dict to a list
+  for show in upcoming_shows_qurey:
+    nextShowinArray['artist_id'] = show.artist_id
+    nextShowinArray['artist_name'] = show.artist.name
+    nextShowinArray['artist_image_link'] = show.artist.image_link
+    nextShowinArray['start_time'] = str(show.created_at)
+    upcoming_shows.append(nextShowinArray.copy())
+
+  # retrive the upcomming shows using join with Show model and Venue model
+  past_shows_qurey = db.session.query(models.Show).join(models.Venue, models.Show.venue_id== venue_id).filter(models.Show.created_at < now)
+  # insert each show in a seperated dict and append each dict to a list
+  for show in past_shows_qurey:
+    nextShowinArray['artist_id'] = show.artist_id
+    nextShowinArray['artist_name'] = show.artist.name
+    nextShowinArray['artist_image_link'] = show.artist.image_link
+    nextShowinArray['start_time'] = str(show.created_at)
+    past_shows.append(nextShowinArray.copy())
 
   data ={
     "id": venue_id,
@@ -454,22 +458,28 @@ def show_artist(artist_id):
   upcoming_shows = []
   past_shows = []
   artist = models.Artist.query.filter_by(id=artist_id).first()
-  shows = models.Show.query.filter_by(artist=artist).all()
   
-  for show in shows:
-        # retrive old shows
-    if show.created_at < now:
-      nextShowinArray['venue_id'] = show.venue.id
-      nextShowinArray['venue_name'] = show.venue.name
-      nextShowinArray['venue_image_link'] = show.venue.image_link
-      nextShowinArray['start_time'] = str(show.created_at)
-      past_shows.append(nextShowinArray.copy())
-    else:
-      nextShowinArray['venue_id'] = show.venue.id
-      nextShowinArray['venue_name'] = show.venue.name
-      nextShowinArray['venue_image_link'] = show.venue.image_link
-      nextShowinArray['start_time'] = str(show.created_at)
-      upcoming_shows.append(nextShowinArray.copy())
+  # retrive the upcomming shows using join with Show model and Artist model
+  upcoming_shows_qurey = db.session.query(models.Show).join(models.Artist, models.Show.artist_id == artist_id).filter(models.Show.created_at > now)
+  # insert each show in a seperated dict and append each dict to a list
+  for show in upcoming_shows_qurey:
+    nextShowinArray['venue_id'] = show.venue_id
+    nextShowinArray['venue_name'] = show.venue.name
+    nextShowinArray['venue_image_link'] = show.venue.image_link
+    nextShowinArray['start_time'] = str(show.created_at)
+    upcoming_shows.append(nextShowinArray.copy())
+
+  # retrive the upcomming shows using join with Show model and Artist model
+  past_shows_qurey = db.session.query(models.Show).join(models.Artist, models.Show.artist_id == artist_id).filter(models.Show.created_at < now)
+  # insert each show in a seperated dict and append each dict to a list
+  for show in past_shows_qurey:
+    nextShowinArray['venue_id'] = show.venue_id
+    nextShowinArray['venue_name'] = show.venue.name
+    nextShowinArray['venue_image_link'] = show.venue.image_link
+    nextShowinArray['start_time'] = str(show.created_at)
+    past_shows.append(nextShowinArray.copy())
+
+  shows = models.Show.query.filter_by(artist=artist).all()
 
   data={
     "id": artist_id,
