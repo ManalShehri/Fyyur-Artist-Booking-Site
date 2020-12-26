@@ -174,7 +174,7 @@ def create_venue_submission():
     db.session.add(insertedVenue)
     db.session.commit()
     flash('Venue ' + name + ' was successfully listed!')
-  except ValueError as e:
+  except Exception as e:
     print(e)
     flash('An error occurred. Venue ' + name + ' could not be listed.')
     db.session.rollback()
@@ -191,7 +191,8 @@ def delete_venue(venue_id):
       db.session.delete(venue)
       db.session.commit()
       flash('Venue ' + name + ' was successfully deleted!')
-    except:
+    except Exception as e:
+      print(e)
       flash('An error occurred. Venue ' + name + ' could not be deleted.')
       db.session.rollback()
     finally:
@@ -319,7 +320,7 @@ def edit_artist_submission(artist_id):
       form.populate_obj(artist)
       db.session.add(artist)
       db.session.commit()
-  except ValueError as e:
+  except Exception as e:
     print(e)
     flash('An error occurred. Artist ' + form.name.data + ' could not be edited.')
     db.session.rollback()
@@ -366,7 +367,7 @@ def edit_venue_submission(venue_id):
       form.populate_obj(venue)
       db.session.add(venue)
       db.session.commit()
-  except ValueError as e:
+  except Exception as e:
     print(e)
     flash('An error occurred. Venue ' + form.name.data + ' could not be edited.')
     db.session.rollback()
@@ -402,7 +403,8 @@ def create_artist_submission():
     db.session.add(insertedArtist)
     db.session.commit()
     flash('Artist ' + name + ' was successfully listed!')
-  except ValueError as e:
+  except Exception as e:
+    print(e)
     flash('An error occurred. Artist ' + name + ' could not be listed.')
     db.session.rollback()
   finally:
@@ -456,7 +458,7 @@ def create_show_submission():
       db.session.add(new_show)
       db.session.commit()
       flash('Show was successfully listed!')
-    except ValueError as e:
+    except Exception as e:
       print(e)
       flash('An error occurred. Show could not be listed.')
       db.session.rollback()
@@ -467,6 +469,18 @@ def create_show_submission():
   flash('An error occurred. Show could not be listed.')
   return render_template('pages/home.html')
 
+@app.errorhandler(400)
+def server_error(error):
+    return render_template('errors/400.html'), 400
+
+@app.errorhandler(401)
+def server_error(error):
+    return render_template('errors/401.html'), 401
+
+@app.errorhandler(403)
+def server_error(error):
+    return render_template('errors/403.html'), 403
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('errors/404.html'), 404
@@ -475,6 +489,17 @@ def not_found_error(error):
 def server_error(error):
     return render_template('errors/500.html'), 500
 
+@app.errorhandler(422)
+def server_error(error):
+    return render_template('errors/422.html'), 422
+
+@app.errorhandler(405)
+def server_error(error):
+    return render_template('errors/405.html'), 405
+
+@app.errorhandler(409)
+def server_error(error):
+    return render_template('errors/409.html'), 409
 
 if not app.debug:
     file_handler = FileHandler('error.log')
