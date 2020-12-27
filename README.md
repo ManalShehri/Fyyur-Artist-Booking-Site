@@ -11,7 +11,7 @@ Your job is to build out the data models to power the API endpoints for the Fyyu
 1. **Download the project starter code locally**
 ```
 git clone https://github.com/ManalShehri/Fyyur-Artist-Booking-Site.git
-cd FSND/projects/01_fyyur/Fyyur-Artist-Booking-Site 
+cd Fyyur-Artist-Booking-Site 
 ```
 
 2. **Initialize and activate a virtualenv using:**
