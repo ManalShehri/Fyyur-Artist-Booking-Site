@@ -14,8 +14,8 @@ from flask_wtf import Form
 from forms import *
 from flask_migrate import Migrate
 import datetime
-# here I tried to import the model classes from models.py (ike: from models import Show), but it will cause a circle importing error, so I imported the whole file instead
-import models
+# here I tried to import the model classes from py (ike: from models import Show), but it will cause a circle importing error, so I imported the whole file instead
+from models import *
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -57,8 +57,8 @@ def index():
 def venues():
 
   locals = []
-  venues = models.Venue.query.all()
-  for place in models.Venue.query.distinct(models.Venue.city, models.Venue.state).all():
+  venues = Venue.query.all()
+  for place in Venue.query.distinct(Venue.city, Venue.state).all():
       locals.append({
           'city': place.city,
           'state': place.state,
@@ -76,7 +76,7 @@ def venues():
 def search_venues():
   
   search =request.form.get('search_term', '')
-  venues = models.Venue.query.filter(Venue.name.ilike('%'+search+'%')).all()
+  venues = Venue.query.filter(Venue.name.ilike('%'+search+'%')).all()
   # source for how to deal with ilike: https://docs.sqlalchemy.org/en/14/orm/internals.html?highlight=ilike#sqlalchemy.orm.attributes.QueryableAttribute.ilike
 
   response = {}
@@ -99,10 +99,10 @@ def show_venue(venue_id):
   upcoming_shows = []
   past_shows = []
 
-  venue = models.Venue.query.filter_by(id=venue_id).first()
+  venue = Venue.query.filter_by(id=venue_id).first()
 
   # retrive the upcomming shows using join with Show model and Venue model
-  upcoming_shows_qurey = db.session.query(models.Show).join(models.Venue, models.Show.venue_id== venue_id).filter(models.Show.created_at> now)
+  upcoming_shows_qurey = db.session.query(Show).join(Venue, Show.venue_id== venue_id).filter(Show.created_at> now)
   # insert each show in a seperated dict and append each dict to a list
   for show in upcoming_shows_qurey:
     nextShowinArray['artist_id'] = show.artist_id
@@ -112,7 +112,7 @@ def show_venue(venue_id):
     upcoming_shows.append(nextShowinArray.copy())
 
   # retrive the upcomming shows using join with Show model and Venue model
-  past_shows_qurey = db.session.query(models.Show).join(models.Venue, models.Show.venue_id== venue_id).filter(models.Show.created_at < now)
+  past_shows_qurey = db.session.query(Show).join(Venue, Show.venue_id== venue_id).filter(Show.created_at < now)
   # insert each show in a seperated dict and append each dict to a list
   for show in past_shows_qurey:
     nextShowinArray['artist_id'] = show.artist_id
@@ -169,7 +169,7 @@ def create_venue_submission():
   # sessions & try source: https://docs.sqlalchemy.org/en/13/orm/session_basics.html
   try:
     # insert to Venue
-    insertedVenue = models.Venue(name = name, city = city, state = state, address = address, phone = phone, image_link = image_link,facebook_link = facebook_link ,website = website, seeking_talent = seeking_talent, genres = genres, seeking_description= seeking_description)
+    insertedVenue = Venue(name = name, city = city, state = state, address = address, phone = phone, image_link = image_link,facebook_link = facebook_link ,website = website, seeking_talent = seeking_talent, genres = genres, seeking_description= seeking_description)
     form.populate_obj(insertedVenue)
     db.session.add(insertedVenue)
     db.session.commit()
@@ -185,7 +185,7 @@ def create_venue_submission():
 @app.route('/venues/<venue_id>/delete', methods=['DELETE'])
 def delete_venue(venue_id):
 
-  venue = models.Venue.query.filter_by(id=venue_id).first()
+  venue = Venue.query.filter_by(id=venue_id).first()
   if venue:
     try:
       db.session.delete(venue)
@@ -204,7 +204,7 @@ def delete_venue(venue_id):
 @app.route('/artists')
 def artists():
   data = []
-  artists = models.Artist.query.all()
+  artists = Artist.query.all()
   artistsDict = {}
   for artist in artists:
     artistsDict['id'] = artist.id 
@@ -217,7 +217,7 @@ def artists():
 def search_artists():
   
   search =request.form.get('search_term', '')
-  artists = models.Artist.query.filter(Artist.name.ilike('%'+search+'%')).all()
+  artists = Artist.query.filter(Artist.name.ilike('%'+search+'%')).all()
   # source for how to deal with ilike: https://docs.sqlalchemy.org/en/14/orm/internals.html?highlight=ilike#sqlalchemy.orm.attributes.QueryableAttribute.ilike
 
   response = {}
@@ -238,10 +238,10 @@ def show_artist(artist_id):
   nextShowinArray = {} 
   upcoming_shows = []
   past_shows = []
-  artist = models.Artist.query.filter_by(id=artist_id).first()
+  artist = Artist.query.filter_by(id=artist_id).first()
   
   # retrive the upcomming shows using join with Show model and Artist model
-  upcoming_shows_qurey = db.session.query(models.Show).join(models.Artist, models.Show.artist_id == artist_id).filter(models.Show.created_at > now)
+  upcoming_shows_qurey = db.session.query(Show).join(Artist, Show.artist_id == artist_id).filter(Show.created_at > now)
   # insert each show in a seperated dict and append each dict to a list
   for show in upcoming_shows_qurey:
     nextShowinArray['venue_id'] = show.venue_id
@@ -251,7 +251,7 @@ def show_artist(artist_id):
     upcoming_shows.append(nextShowinArray.copy())
 
   # retrive the upcomming shows using join with Show model and Artist model
-  past_shows_qurey = db.session.query(models.Show).join(models.Artist, models.Show.artist_id == artist_id).filter(models.Show.created_at < now)
+  past_shows_qurey = db.session.query(Show).join(Artist, Show.artist_id == artist_id).filter(Show.created_at < now)
   # insert each show in a seperated dict and append each dict to a list
   for show in past_shows_qurey:
     nextShowinArray['venue_id'] = show.venue_id
@@ -260,7 +260,7 @@ def show_artist(artist_id):
     nextShowinArray['start_time'] = str(show.created_at)
     past_shows.append(nextShowinArray.copy())
 
-  shows = models.Show.query.filter_by(artist=artist).all()
+  shows = Show.query.filter_by(artist=artist).all()
 
   data={
     "id": artist_id,
@@ -286,7 +286,7 @@ def show_artist(artist_id):
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
   form = ArtistForm()
-  artist = models.Artist.query.filter_by(id=artist_id).first()
+  artist = Artist.query.filter_by(id=artist_id).first()
   form.name.data = artist.name
   form.city.data = artist.city
   form.state.data = artist.state
@@ -305,7 +305,7 @@ def edit_artist_submission(artist_id):
   from models import db
   form = ArtistForm()
   try:
-    artist = models.Artist.query.filter_by(id=artist_id).first()
+    artist = Artist.query.filter_by(id=artist_id).first()
     if artist:
       artist.name = form.name.data
       artist.city = form.city.data
@@ -332,7 +332,7 @@ def edit_artist_submission(artist_id):
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
   form = VenueForm()
-  venue = models.Venue.query.filter_by(id=venue_id).first()
+  venue = Venue.query.filter_by(id=venue_id).first()
   form.name.data = venue.name
   form.city.data = venue.city
   form.state.data = venue.state
@@ -351,7 +351,7 @@ def edit_venue_submission(venue_id):
   from models import db
   form = VenueForm()
   try:
-    venue = models.Venue.query.filter_by(id=venue_id).first()
+    venue = Venue.query.filter_by(id=venue_id).first()
     if venue:
       venue.name = form.name.data
       venue.city = form.city.data 
@@ -398,7 +398,7 @@ def create_artist_submission():
   image_link = form.image_link.data
 
   try:
-    insertedArtist = models.Artist(name = name, city = city, state = state, phone = phone, image_link = image_link,facebook_link = facebook_link ,website = website, seeking_venue = seeking_venue, genres = genres, seeking_description= seeking_description)
+    insertedArtist = Artist(name = name, city = city, state = state, phone = phone, image_link = image_link,facebook_link = facebook_link ,website = website, seeking_venue = seeking_venue, genres = genres, seeking_description= seeking_description)
     form.populate_obj(insertedArtist)
     db.session.add(insertedArtist)
     db.session.commit()
@@ -418,7 +418,7 @@ def create_artist_submission():
 @app.route('/shows')
 def shows():
   data = []
-  AllShows = models.Show.query.all()
+  AllShows = Show.query.all()
   showsDict = {}
 
   for show in AllShows:
@@ -443,17 +443,17 @@ def create_show_submission():
 
   form = ShowForm()
   artist_id = form.artist_id.data
-  artist = models.Artist.query.filter_by(id=artist_id).first()
+  artist = Artist.query.filter_by(id=artist_id).first()
 
   venue_id = form.venue_id.data
-  venue = models.Venue.query.filter_by(id=venue_id).first()
+  venue = Venue.query.filter_by(id=venue_id).first()
 
   start_time = form.start_time.data
 
   if artist and venue:
     from models import db
     try:
-      new_show = models.Show(artist = artist,venue= venue, created_at = start_time)
+      new_show = Show(artist = artist,venue= venue, created_at = start_time)
       form.populate_obj(new_show)
       db.session.add(new_show)
       db.session.commit()

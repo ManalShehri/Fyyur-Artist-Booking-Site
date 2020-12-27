@@ -2,7 +2,7 @@ import json
 from flask import Flask 
 from flask_sqlalchemy import SQLAlchemy
 import datetime
-from app import db
+db = SQLAlchemy()
 
 #----------------------------------------------------------------------------#
 # Models.
